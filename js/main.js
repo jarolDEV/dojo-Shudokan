@@ -5,18 +5,18 @@
 // Navegación móvil
 const Navigation = (() => {
     const init = () => {
-        const toggle = document.querySelector('.nav__toggle');
-        const menu = document.querySelector('.nav__menu');
+        const botonMenu = document.querySelector('.nav__toggle');
+        const menuNavegacion = document.querySelector('.nav__menu');
 
-        if (!toggle || !menu) return;
+        if (!botonMenu || !menuNavegacion) return;
         
-        toggle.addEventListener('click', () => {
-            menu.classList.toggle('active');
+        botonMenu.addEventListener('click', () => {
+            menuNavegacion.classList.toggle('active');
         });
 
-        document.querySelectorAll('.nav__link').forEach(link => {
-            link.addEventListener('click', () => {
-                menu.classList.remove('active');
+        document.querySelectorAll('.nav__link').forEach(enlace => {
+            enlace.addEventListener('click', () => {
+                menuNavegacion.classList.remove('active');
             });
         });
     };
@@ -24,18 +24,65 @@ const Navigation = (() => {
     return { init };
 })();
 
-// Formulario de contacto
+// Formulario de contacto con Web3Forms
 const ContactForm = (() => {
     const init = () => {
-        const form = document.getElementById('contactForm');
-        if (!form) return;
-        form.addEventListener('submit', handleSubmit);
+        const formulario = document.getElementById('contactForm');
+        if (!formulario) return;
+        formulario.addEventListener('submit', enviarFormulario);
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        alert('¡Gracias por tu mensaje! Te contactaremos pronto.');
-        e.target.reset();
+    const enviarFormulario = async (evento) => {
+        evento.preventDefault();
+        
+        const formulario = evento.target;
+        const botonEnviar = formulario.querySelector('button[type="submit"]');
+        const contenedorResultado = document.getElementById('formularioResultado');
+        const textoOriginalBoton = botonEnviar.textContent;
+        
+        // Deshabilitar botón mientras se envía
+        botonEnviar.disabled = true;
+        botonEnviar.textContent = 'Enviando...';
+        
+        // Limpiar mensaje anterior
+        if (contenedorResultado) {
+            contenedorResultado.textContent = '';
+            contenedorResultado.className = 'form__resultado';
+        }
+
+        try {
+            const datosFormulario = new FormData(formulario);
+            
+            const respuesta = await fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                body: datosFormulario
+            });
+
+            const resultado = await respuesta.json();
+
+            if (resultado.success) {
+                mostrarMensaje(contenedorResultado, '✅ ¡Gracias por tu mensaje! Te contactaremos pronto.', 'exito');
+                formulario.reset();
+            } else {
+                throw new Error(resultado.message || 'Error al enviar el formulario');
+            }
+        } catch (error) {
+            console.error('Error al enviar formulario:', error);
+            mostrarMensaje(contenedorResultado, '❌ Hubo un error al enviar el mensaje. Por favor intenta de nuevo.', 'error');
+        } finally {
+            // Restaurar botón
+            botonEnviar.disabled = false;
+            botonEnviar.textContent = textoOriginalBoton;
+        }
+    };
+
+    const mostrarMensaje = (contenedor, mensaje, tipo) => {
+        if (contenedor) {
+            contenedor.textContent = mensaje;
+            contenedor.className = `form__resultado form__resultado--${tipo}`;
+        } else {
+            alert(mensaje);
+        }
     };
 
     return { init };
@@ -44,35 +91,33 @@ const ContactForm = (() => {
 // Carrusel de noticias
 const Carousel = (() => {
     const init = () => {
-        const track = document.getElementById('noticias-container');
-        const btnLeft = document.querySelector('.carousel__btn--left');
-        const btnRight = document.querySelector('.carousel__btn--right');
+        const contenedorNoticias = document.getElementById('noticias-container');
+        const botonIzquierdo = document.querySelector('.carousel__btn--left');
+        const botonDerecho = document.querySelector('.carousel__btn--right');
 
-        if (!track || !btnLeft || !btnRight) return;
+        if (!contenedorNoticias || !botonIzquierdo || !botonDerecho) return;
 
-        const getScrollAmount = () => {
-            const card = track.querySelector('.news-card');
-            if (!card) return 300;
-            return card.offsetWidth + 24;
+        const calcularDesplazamiento = () => {
+            const tarjetaNoticia = contenedorNoticias.querySelector('.news-card');
+            if (!tarjetaNoticia) return 300;
+            return tarjetaNoticia.offsetWidth + 24;
         };
 
-        btnRight.addEventListener('click', () => {
-            const maxScroll = track.scrollWidth - track.clientWidth;
+        botonDerecho.addEventListener('click', () => {
+            const desplazamientoMaximo = contenedorNoticias.scrollWidth - contenedorNoticias.clientWidth;
 
-            if (track.scrollLeft >= maxScroll - 10) {
-                // Si estamos al final, volver al inicio
-                track.scrollTo({ left: 0, behavior: 'smooth' });
+            if (contenedorNoticias.scrollLeft >= desplazamientoMaximo - 10) {
+                contenedorNoticias.scrollTo({ left: 0, behavior: 'smooth' });
             } else {
-                track.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
+                contenedorNoticias.scrollBy({ left: calcularDesplazamiento(), behavior: 'smooth' });
             }
         });
 
-        btnLeft.addEventListener('click', () => {
-            if (track.scrollLeft <= 10) {
-                // Si estamos al inicio, ir al final
-                track.scrollTo({ left: track.scrollWidth, behavior: 'smooth' });
+        botonIzquierdo.addEventListener('click', () => {
+            if (contenedorNoticias.scrollLeft <= 10) {
+                contenedorNoticias.scrollTo({ left: contenedorNoticias.scrollWidth, behavior: 'smooth' });
             } else {
-                track.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
+                contenedorNoticias.scrollBy({ left: -calcularDesplazamiento(), behavior: 'smooth' });
             }
         });
     };
@@ -85,11 +130,9 @@ const inicializarCuandoSeccionesEstenListas = () => {
     const navegacionExiste = document.querySelector('.nav__toggle');
     
     if (navegacionExiste) {
-        // Las secciones ya se cargaron
         Navigation.init();
         ContactForm.init();
     } else {
-        // Esperar a que las secciones se carguen
         document.addEventListener('sectionsLoaded', () => {
             Navigation.init();
             ContactForm.init();

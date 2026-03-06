@@ -45,6 +45,12 @@
                 </a>
             </div>
             <form class="contact__form" id="contactForm">
+                <input type="hidden" name="access_key" value="4cde8527-e82d-4f5c-9588-fb539e646b3e">
+                <input type="hidden" name="subject" value="Nuevo mensaje desde Academia Shodukan">
+                <input type="hidden" name="from_name" value="Academia de Artes Marciales Shodukan - Contacto">
+                <!-- Honeypot anti-spam -->
+                <input type="checkbox" name="botcheck" style="display: none;">
+                
                 <div class="form__group">
                     <label for="nombre">Nombre</label>
                     <input type="text" id="nombre" name="nombre" required>
@@ -58,6 +64,7 @@
                     <textarea id="mensaje" name="mensaje" rows="4" required></textarea>
                 </div>
                 <button type="submit" class="btn btn--primary btn--full">Enviar mensaje</button>
+                <div id="formularioResultado" class="form__resultado"></div>
             </form>
         </div>
     </div>

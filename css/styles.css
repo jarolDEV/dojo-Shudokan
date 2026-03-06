@@ -704,3 +704,28 @@ ul { list-style: none; }
         grid-template-columns: repeat(3, 1fr);
     }
 }
+
+/* Estilos para el resultado del formulario */
+.form__resultado {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    text-align: center;
+    font-weight: 500;
+}
+
+.form__resultado:empty {
+    display: none;
+}
+
+.form__resultado--exito {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.form__resultado--error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
