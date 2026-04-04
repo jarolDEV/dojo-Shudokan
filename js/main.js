@@ -61,14 +61,14 @@ const ContactForm = (() => {
             const resultado = await respuesta.json();
 
             if (resultado.success) {
-                mostrarMensaje(contenedorResultado, '✅ ¡Gracias por tu mensaje! Te contactaremos pronto.', 'exito');
+                mostrarMensaje(contenedorResultado, '¡Gracias por tu mensaje! Te contactaremos pronto.', 'exito');
                 formulario.reset();
             } else {
                 throw new Error(resultado.message || 'Error al enviar el formulario');
             }
         } catch (error) {
             console.error('Error al enviar formulario:', error);
-            mostrarMensaje(contenedorResultado, '❌ Hubo un error al enviar el mensaje. Por favor intenta de nuevo.', 'error');
+            mostrarMensaje(contenedorResultado, 'Hubo un error al enviar el mensaje. Por favor intenta de nuevo.', 'error');
         } finally {
             // Restaurar botón
             botonEnviar.disabled = false;
@@ -83,6 +83,24 @@ const ContactForm = (() => {
         } else {
             alert(mensaje);
         }
+    };
+
+    return { init };
+})();
+
+// WhatsApp button (configurable)
+const WhatsAppButton = (() => {
+    const init = () => {
+        const btn = document.querySelector('.whatsapp-btn');
+        if (!btn) return;
+
+        const phone = window.SITE_CONFIG?.whatsappPhone || '50688990612';
+        const message = window.SITE_CONFIG?.whatsappMessage || 'Hola, deseo información.';
+        const href = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+        btn.setAttribute('href', href);
+        btn.setAttribute('target', '_blank');
+        btn.setAttribute('rel', 'noopener noreferrer');
     };
 
     return { init };
@@ -125,17 +143,21 @@ const Carousel = (() => {
     return { init };
 })();
 
-// Verificar si las secciones ya se cargaron O esperar el evento
+// Verificar si las secciones ya se cargaron o espera el evento
 const inicializarCuandoSeccionesEstenListas = () => {
     const navegacionExiste = document.querySelector('.nav__toggle');
-    
-    if (navegacionExiste) {
+
+    const initAll = () => {
         Navigation.init();
         ContactForm.init();
+        WhatsAppButton.init();
+    };
+
+    if (navegacionExiste) {
+        initAll();
     } else {
         document.addEventListener('sectionsLoaded', () => {
-            Navigation.init();
-            ContactForm.init();
+            initAll();
         });
     }
 };
